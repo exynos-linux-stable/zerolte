@@ -96,3 +96,21 @@ x509.genkey
 
 # Kconfig presets
 all.config
+
+#
+# Common kernel build output
+#
+/build/
+/out/
+/arch/*/boot/Image
+/arch/*/boot/Image.gz
+/arch/*/boot/Image.lz4
+/arch/*/boot/uImage
+/arch/*/boot/zImage
+*.dtb
+*.dtbo
+*.gcda
+*.gcov
+*.mod
+*.su
+compile_commands.json
