@@ -1238,9 +1238,13 @@ static void s3c24xx_serial_pm(struct uart_port *port, unsigned int level,
 {
 	struct s3c24xx_uart_port *ourport = to_ourport(port);
 	unsigned int umcon;
+	int timeout = 10000;
 
 	switch (level) {
 	case S3C24XX_UART_PORT_SUSPEND:
+		while (--timeout && !s3c24xx_serial_txempty_nofifo(port))
+			udelay(100);
+
 		/* disable auto flow control & set nRTS for High */
 		umcon = rd_regl(port, S3C2410_UMCON);
 		umcon &= ~(S3C2410_UMCOM_AFC | S3C2410_UMCOM_RTS_LOW);
@@ -1428,14 +1432,14 @@ static void s3c24xx_serial_set_termios(struct uart_port *port,
 	/* check to see if we need  to change clock source */
 
 	if (ourport->baudclk != clk) {
+		clk_prepare_enable(clk);
+
 		s3c24xx_serial_setsource(port, clk_sel);
 
 		if (!IS_ERR(ourport->baudclk)) {
 			clk_disable_unprepare(ourport->baudclk);
 			ourport->baudclk = ERR_PTR(-EINVAL);
 		}
-
-		clk_prepare_enable(clk);
 
 		ourport->baudclk = clk;
 		ourport->baudclk_rate = clk ? clk_get_rate(clk) : 0;
